@@ -1,0 +1,23 @@
+Download the files needed for mapping
+
+panphlan_download_pangenome.py -i Bifidobacterium_longum
+
+Map each metagenomic sample against the species database. 
+
+
+panphlan_map.py -p Bifidobacterium_longum/Bifidobacterium_longum_pangenome.tsv \
+                --indexes Bifidobacterium_longum/Bifidobacterium_longum \    
+                -i fileinput.fastq \
+                -o map_results/fileinput_blongum.csv
+
+
+
+Merge and process the mapping results to generate the final gene-family presence/absence profile matrix
+
+
+panphlan_profiling.py -i map_results/ \
+                      --o_matrix result_profile_blongum.tsv \ 
+                      -p Bifidobacterium_longum/Bifidobacterium_longum_pangenome.tsv \
+                      --add_ref
+
+

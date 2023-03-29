@@ -1,0 +1,29 @@
+##Quality control
+
+1_NGLess_QC.ngl
+
+###Assemblies
+
+This line executes the SPAdes genome assembler on paired-end Illumina reads, with metagenomics options
+/vol1/Programas/SPAdes-3.13.0-Linux/bin/spades.py --meta -k 21,33,55,77,99,127 -m 500 -t 62 -o file_out	-1 filein_R1.fastq.gz -2 filein_R2.fastq.gz	
+
+#ORF prediction
+
+This command runs Prodigal, a gene prediction software. The resulting predicted protein sequences will be saved in the output_proteins.fasta file, and the nucleotide sequences of the predicted genes will be saved in the output_nucleotides.fasta file. The "-p meta" option specifies that the program should use a metagenomic-specific model for gene prediction.
+
+prodigal -i input_assembly.fasta -a output_proteins.fasta -d output_nucleotides.fasta -p meta
+
+
+#Metaphlan3
+
+This line is running the metaphlan command to perform taxonomic profiling of microbial communities based on metagenomic sequencing data in SAM format. The metaphlan command uses a set of clade-specific marker genes to estimate the abundance of different microbial taxa in the sample. The output file will contain a table with the taxonomic abundance profiles for each sample.
+
+metaphlan fileinput.sam --input_type sam -o counts/fileoutput_profile_counts.txt --nproc 60 -t marker_counts
+
+
+#dbCAN2
+
+This line is running the run_dbcan command to perform functional annotation of carbohydrate-active enzymes (CAZymes) in protein sequences.
+run_dbcan 3_Clustering/nt/ORFs_clusters_nt.fasta prok --db_dir CAZy/db --dia_cpu 28 --out_dir 2_dbCAN2 --hmm_cpu 28 --eCAMI_jobs 28 --tf_cpu 28
+
+

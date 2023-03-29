@@ -1,0 +1,35 @@
+ngless "1.1"
+import "parallel" version "0.6"
+import "mocat" version "0.0"
+import "motus" version "0.1"
+
+## 1. Data reading
+
+samples = readlines('samples.txt')
+sample = lock1(samples)
+input = load_mocat_sample(sample)
+
+# 2. Quality filtering
+input = preprocess(input, keep_singles=False) using |read|:
+    read = substrim(read, min_quality=20)
+    if len(read) < 45:
+        discard
+
+write(input, ofile='0_Sequences/merged/2_Q20L45/' +sample+ '_Q20L45.fq.gz')
+
+# 3. Removing human contamination
+mapped = map(input, reference='hg19')    
+
+mapped = select(mapped) using |mr|:
+    mr = mr.filter(min_match_size=45, min_identity_pc=97, action={unmatch})
+    if mr.flag({mapped}):
+        discard
+
+write(mapped, ofile='0_Sequences/merged/3_NoHuman/files/' +sample+ '.bam')
+write(qcstats({mapping}), ofile='0_Sequences/merged/3_NoHuman/files/' +sample+ '.mapping-stats.tsv')
+write(mapstats(mapped), ofile='0_Sequences/merged/3_NoHuman/files/' +sample+ '.maphuman97p_stats_after_select.tsv')
+
+
+input = as_reads(mapped)
+write(input, ofile='0_Sequences/merged/3_NoHuman/' +sample+ '_Q20L45_nohuman.fq.gz')
+
